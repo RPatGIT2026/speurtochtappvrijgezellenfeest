@@ -509,24 +509,39 @@ export default function HomePage() {
             </>
           ) : (
             <>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <a
-                  href={mapsLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-2xl bg-zinc-950 px-5 py-4 text-center font-medium text-white"
-                >
-                  Open route
-                </a>
+              <div className="grid gap-3 sm:grid-cols-3">
+  <a
+    href={mapsLink}
+    target="_blank"
+    rel="noreferrer"
+    className="rounded-2xl bg-zinc-950 px-5 py-4 text-center font-medium text-white"
+  >
+    Open route
+  </a>
 
-                <button
-                  className="rounded-2xl bg-zinc-200 px-5 py-4 font-medium text-zinc-900 disabled:opacity-50"
-                  onClick={checkLocation}
-                  disabled={isCheckingLocation}
-                >
-                  {isCheckingLocation ? "Locatie controleren..." : "Ik ben aangekomen"}
-                </button>
-              </div>
+  <button
+    className="rounded-2xl bg-zinc-200 px-5 py-4 font-medium text-zinc-900 disabled:opacity-50"
+    onClick={checkLocation}
+    disabled={isCheckingLocation}
+  >
+    {isCheckingLocation ? "Locatie controleren..." : "Ik ben aangekomen"}
+  </button>
+
+  <button
+    type="button"
+    className="rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 font-medium text-amber-900"
+    onClick={() => {
+      setIsAtLocation(true);
+      setDistance(null);
+      showStatus(
+        "Opdracht handmatig vrijgegeven. Gebruik dit alleen als GPS niet goed werkt.",
+        "warning"
+      );
+    }}
+  >
+    Toon opdracht handmatig
+  </button>
+</div>
 
               {distance !== null && (
                 <p className="mt-3 text-sm text-zinc-500">
