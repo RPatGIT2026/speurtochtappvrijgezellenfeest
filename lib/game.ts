@@ -6,6 +6,8 @@ export type LocationItem = {
   lng?: number;
   radiusMeters?: number;
   challenge?: string;
+  infoTitle?: string;
+  infoText?: string;
   isFinal?: boolean;
 };
 
@@ -17,6 +19,9 @@ export const LOCATIONS: Record<string, LocationItem> = {
     lat: 51.5553,
     lng: 5.0914,
     radiusMeters: 75,
+    infoTitle: "Welkom bij de Heikese kerk",
+    infoText:
+      "Dit is een van de bekendste plekken van Tilburg. De kerk ligt midden in het centrum en geeft meteen dat oude stadsgevoel van de stad.",
     challenge:
       "Tegenover de kerk vind je het standbeeld van Willem 2. Wie kan hem het beste nadoen? Drink achteraf een biertje op Willem.",
   },
@@ -27,6 +32,9 @@ export const LOCATIONS: Record<string, LocationItem> = {
     lat: 51.5607,
     lng: 5.0919,
     radiusMeters: 75,
+    infoTitle: "Welkom in de Spoorzone",
+    infoText:
+      "De Spoorzone laat goed zien hoe Tilburg is veranderd. Waar vroeger treinen en werkplaatsen centraal stonden, is het nu een creatieve en levendige plek.",
     challenge:
       "Bierpong op straat. Speel een potje met 3 bekers (en 2 biertjes) per kant op een bankje of tafel in teams. Het verliezende team neemt een shotje.",
   },
@@ -37,6 +45,9 @@ export const LOCATIONS: Record<string, LocationItem> = {
     lat: 51.5575,
     lng: 5.0906,
     radiusMeters: 75,
+    infoTitle: "Welkom bij 013",
+    infoText:
+      "013 is een van de bekendste plekken voor live muziek in Tilburg. Veel grote artiesten hebben hier opgetreden, dus dit is echt een iconische plek.",
     challenge: "Neem een shotje met 2 milfs.",
   },
   piushaven: {
@@ -46,6 +57,9 @@ export const LOCATIONS: Record<string, LocationItem> = {
     lat: 51.5533,
     lng: 5.0867,
     radiusMeters: 75,
+    infoTitle: "Welkom bij de Piushaven",
+    infoText:
+      "De Piushaven begon ooit als werkhaven en is nu een van de gezelligste stukken van Tilburg. Hier hangt een heel andere sfeer dan in het centrum.",
     challenge:
       "Doe een straatinterview van minimaal 2 minuten met een dame (en adt daarna een biertje).",
   },
@@ -55,6 +69,9 @@ export const LOCATIONS: Record<string, LocationItem> = {
     mapsQuery: "Ruby's Irish Pub Tilburg",
     lat: 51.5572,
     lng: 5.0917,
+    infoTitle: "Eindbestemming bereikt",
+    infoText:
+      "Ruby's is jullie eindpunt. Tijd om terug te kijken op de route, de filmpjes en natuurlijk om het vrijgezellenfeest goed af te sluiten.",
     isFinal: true,
   },
 };

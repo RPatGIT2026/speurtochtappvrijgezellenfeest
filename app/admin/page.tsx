@@ -45,6 +45,8 @@ export default function AdminPage() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [lastUpdated, setLastUpdated] = useState<string>("");
+  const [skipLoadingTeamId, setSkipLoadingTeamId] = useState<number | null>(null);
+  const [skipMessage, setSkipMessage] = useState("");
 
   const adminCode = process.env.NEXT_PUBLIC_ADMIN_CODE;
 
@@ -114,6 +116,40 @@ export default function AdminPage() {
   function getPublicUrl(filePath: string) {
     const { data } = supabase.storage.from("videos").getPublicUrl(filePath);
     return data.publicUrl;
+  }
+
+  async function skipTeamToNextLocation(team: TeamRow) {
+    const route = TEAM_ROUTES[team.team_number] || [];
+    const maxIndex = Math.max(route.length - 1, 0);
+
+    if (team.current_stop_index >= maxIndex) {
+      setSkipMessage(`${TEAM_LABELS[team.team_number]} zit al op de laatste locatie.`);
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Weet je zeker dat je ${TEAM_LABELS[team.team_number]} wilt doorschakelen naar de volgende locatie?`
+    );
+
+    if (!confirmed) return;
+
+    setSkipLoadingTeamId(team.id);
+    setSkipMessage("");
+
+    const { error } = await supabase
+      .from("teams")
+      .update({ current_stop_index: team.current_stop_index + 1 })
+      .eq("id", team.id);
+
+    if (error) {
+      setSkipMessage(`Doorschakelen mislukt: ${error.message}`);
+      setSkipLoadingTeamId(null);
+      return;
+    }
+
+    setSkipMessage(`${TEAM_LABELS[team.team_number]} is doorgestuurd naar de volgende locatie.`);
+    setSkipLoadingTeamId(null);
+    await loadData();
   }
 
   const teamMap = useMemo(() => {
@@ -192,6 +228,12 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {skipMessage && (
+          <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-800">
+            {skipMessage}
+          </div>
+        )}
+
         <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
           <section className="rounded-3xl bg-white p-6 shadow-xl ring-1 ring-zinc-200">
             <h2 className="mb-4 text-2xl font-semibold text-zinc-900">Live teams</h2>
@@ -205,15 +247,27 @@ export default function AdminPage() {
 
                 return (
                   <div key={team.id} className="rounded-2xl bg-zinc-50 p-4 ring-1 ring-zinc-200">
-                    <p className="text-lg font-semibold text-zinc-900">
-                      {TEAM_LABELS[team.team_number]}
-                    </p>
-                    <p className="mt-1 text-sm text-zinc-500">
-                      Huidige/volgende locatie: {nextLocationName}
-                    </p>
-                    <p className="mt-1 text-sm text-zinc-500">
-                      Stop index: {team.current_stop_index}
-                    </p>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-lg font-semibold text-zinc-900">
+                          {TEAM_LABELS[team.team_number]}
+                        </p>
+                        <p className="mt-1 text-sm text-zinc-500">
+                          Huidige/volgende locatie: {nextLocationName}
+                        </p>
+                        <p className="mt-1 text-sm text-zinc-500">
+                          Stop index: {team.current_stop_index}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => skipTeamToNextLocation(team)}
+                        disabled={skipLoadingTeamId === team.id}
+                        className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 disabled:opacity-50"
+                      >
+                        {skipLoadingTeamId === team.id ? "Bezig..." : "Sla opdracht over"}
+                      </button>
+                    </div>
 
                     <div className="mt-3 rounded-2xl bg-white p-3 ring-1 ring-zinc-200">
                       <p className="text-sm font-medium text-zinc-800">Live locatie</p>
@@ -267,7 +321,10 @@ export default function AdminPage() {
                     ) : (
                       <ol className="mt-3 space-y-2 text-sm text-zinc-700">
                         {completed.map((locationId, index) => (
-                          <li key={`${team.id}-${locationId}-${index}`} className="rounded-xl bg-white p-3 ring-1 ring-zinc-200">
+                          <li
+                            key={`${team.id}-${locationId}-${index}`}
+                            className="rounded-xl bg-white p-3 ring-1 ring-zinc-200"
+                          >
                             {index + 1}. {getLocationName(locationId)}
                           </li>
                         ))}

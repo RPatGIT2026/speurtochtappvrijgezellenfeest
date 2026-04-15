@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
 import {
   TEAM_LABELS,
@@ -34,9 +34,12 @@ export default function HomePage() {
   const [isCheckingLocation, setIsCheckingLocation] = useState(false);
   const [lastFailedUpload, setLastFailedUpload] = useState(false);
   const [lastUploadedCount, setLastUploadedCount] = useState<number | null>(null);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [seenLocationKey, setSeenLocationKey] = useState<string | null>(null);
 
   const maxVideoMb = Number(process.env.NEXT_PUBLIC_MAX_VIDEO_MB || "50");
   const maxVideoBytes = maxVideoMb * 1024 * 1024;
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("teamCode");
@@ -69,6 +72,21 @@ export default function HomePage() {
     if (!team) return null;
     return getCurrentLocationForTeam(team.team_number, team.current_stop_index);
   }, [team]);
+
+  useEffect(() => {
+    if (!team || !currentLocation) return;
+
+    const modalKey = `${team.team_number}-${team.current_stop_index}-${currentLocation.id}`;
+    if (seenLocationKey !== modalKey) {
+      setShowLocationModal(true);
+      setSeenLocationKey(modalKey);
+      setIsAtLocation(false);
+      setDistance(null);
+      setSelectedFiles([]);
+      setLastFailedUpload(false);
+      setLastUploadedCount(null);
+    }
+  }, [team, currentLocation, seenLocationKey]);
 
   const progressPercent = useMemo(() => {
     if (!team) return 0;
@@ -186,11 +204,16 @@ export default function HomePage() {
     setTeamCode("");
     setSelectedFiles([]);
     resetLocationState();
+    setShowLocationModal(false);
+    setSeenLocationKey(null);
     showStatus("Je bent uitgelogd.", "info");
   }
 
   function checkLocation() {
-    if (!currentLocation?.lat || !currentLocation?.lng) return;
+    if (!currentLocation?.lat || !currentLocation?.lng) {
+      showStatus("Voor deze locatie zijn geen GPS-coördinaten beschikbaar.", "error");
+      return;
+    }
 
     if (!navigator.geolocation) {
       showStatus("Locatie wordt niet ondersteund op dit apparaat.", "error");
@@ -270,7 +293,11 @@ export default function HomePage() {
       .single();
 
     if (submissionError || !submissionData) {
-      showStatus("Er ging iets mis bij het aanmaken van de inzending.", "error");
+      console.error("Submission error:", submissionError);
+      showStatus(
+        `Inzending aanmaken mislukt: ${submissionError?.message || "onbekende fout"}`,
+        "error"
+      );
       setLastFailedUpload(true);
       setIsSubmitting(false);
       return;
@@ -280,12 +307,25 @@ export default function HomePage() {
       const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
       const filePath = `team-${team.team_number}/${currentLocation.id}/${Date.now()}-${safeFileName}`;
 
+      console.log("Uploading file:", {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+      });
+
       const { error: uploadError } = await supabase.storage
         .from("videos")
-        .upload(filePath, file, { upsert: false });
+        .upload(filePath, file, {
+          upsert: false,
+          contentType: file.type || "video/mp4",
+        });
 
       if (uploadError) {
-        showStatus(`Upload mislukt voor ${file.name}. Probeer opnieuw.`, "error");
+        console.error("Supabase upload error:", uploadError);
+        showStatus(
+          `Upload mislukt voor ${file.name}: ${uploadError.message || "onbekende fout"}`,
+          "error"
+        );
         setLastFailedUpload(true);
         setIsSubmitting(false);
         return;
@@ -299,7 +339,13 @@ export default function HomePage() {
         });
 
       if (videoInsertError) {
-        showStatus("De video is wel geüpload, maar niet goed geregistreerd.", "error");
+        console.error("Video insert error:", videoInsertError);
+        showStatus(
+          `Video geüpload, maar database-opslag mislukte: ${
+            videoInsertError.message || "onbekende fout"
+          }`,
+          "error"
+        );
         setLastFailedUpload(true);
         setIsSubmitting(false);
         return;
@@ -318,13 +364,14 @@ export default function HomePage() {
       return;
     }
 
-    setLastUploadedCount(selectedFiles.length);
+    const uploadedCount = selectedFiles.length;
+    setLastUploadedCount(uploadedCount);
     setSelectedFiles([]);
     resetLocationState();
     await refreshTeam();
     setIsSubmitting(false);
     showStatus(
-      `${selectedFiles.length} video${selectedFiles.length > 1 ? "'s zijn" : " is"} succesvol geüpload. De volgende locatie staat klaar.`,
+      `${uploadedCount} video${uploadedCount > 1 ? "'s zijn" : " is"} succesvol geüpload. De volgende locatie staat klaar.`,
       "success"
     );
   }
@@ -376,10 +423,36 @@ export default function HomePage() {
     );
   }
 
-  const mapsLink = getGoogleMapsLink(currentLocation.name, currentLocation.lat, currentLocation.lng, currentLocation.mapsQuery );
+  const mapsLink = getGoogleMapsLink(
+    currentLocation.name,
+    currentLocation.lat,
+    currentLocation.lng,
+    currentLocation.mapsQuery
+  );
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-zinc-100 via-white to-zinc-100 p-4 sm:p-6">
+      {showLocationModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+            <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Nieuwe locatie</p>
+            <h2 className="mt-2 text-2xl font-bold text-zinc-900">
+              {currentLocation.infoTitle || currentLocation.name}
+            </h2>
+            <p className="mt-4 leading-relaxed text-zinc-700">
+              {currentLocation.infoText || "Jullie zijn aangekomen op een nieuwe locatie."}
+            </p>
+
+            <button
+              onClick={() => setShowLocationModal(false)}
+              className="mt-6 w-full rounded-2xl bg-zinc-950 px-4 py-4 font-semibold text-white"
+            >
+              Verder
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="mx-auto max-w-2xl">
         <div className="mb-5 rounded-3xl bg-zinc-950 p-5 text-white shadow-2xl">
           <div className="flex items-start justify-between gap-3">
@@ -476,6 +549,7 @@ export default function HomePage() {
                     </label>
 
                     <input
+                      ref={fileInputRef}
                       type="file"
                       accept="video/*"
                       capture="environment"
