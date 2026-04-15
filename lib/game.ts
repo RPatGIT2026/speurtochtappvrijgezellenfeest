@@ -9,53 +9,55 @@ export type LocationItem = {
 };
 
 export const LOCATIONS: Record<string, LocationItem> = {
-  kerk: {
-    id: "kerk",
-    name: "Sint Dionysiuskerk",
-    lat: 51.5547,
-    lng: 5.0852,
-    radiusMeters: 75,
+  berkebrom: {
+    id: "berkebrom",
+    name: "Eetcafé In den Berkebrom",
+    lat: 51.9516,
+    lng: 4.4337,
+    radiusMeters: 100,
+    challenge: "Maak hier een korte teamselfie-video van 10 seconden.",
+  },
+  grotekerk: {
+    id: "grotekerk",
+    name: "Grote Kerk Overschie",
+    lat: 51.9523,
+    lng: 4.4347,
+    radiusMeters: 100,
     challenge:
-      "Tegenover de kerk vind je het standbeeld van Willem 2. Wie kan hem het beste nadoen? Drink achteraf een biertje op Willem.",
+      "Laat 1 teamlid een speech van 15 seconden geven alsof hij burgemeester is.",
   },
-  spoorzone: {
-    id: "spoorzone",
-    name: "Spoorzone (LocHal)",
-    lat: 51.5611,
-    lng: 5.0858,
-    radiusMeters: 75,
+  museum: {
+    id: "museum",
+    name: "Museum Overschie",
+    lat: 51.9530,
+    lng: 4.4355,
+    radiusMeters: 100,
     challenge:
-      "Bierpong op straat. Speel een potje met 3 bekers (en 2 biertjes) per kant op een bankje of tafel in teams. Het verliezende team neemt een shotje.",
+      "Maak een video waarin jullie doen alsof jullie een museumrondleiding geven.",
   },
-  poppodium013: {
-    id: "poppodium013",
-    name: "013 Poppodium",
-    lat: 51.5578,
-    lng: 5.0929,
-    radiusMeters: 75,
-    challenge: "Neem een shotje met 2 milfs.",
-  },
-  piushaven: {
-    id: "piushaven",
-    name: "Piushaven",
-    lat: 51.552576,
-    lng: 5.096929,
-    radiusMeters: 75,
+  halte: {
+    id: "halte",
+    name: "Bibliotheek Overschie / De Halte",
+    lat: 51.9537,
+    lng: 4.4361,
+    radiusMeters: 100,
     challenge:
-      "Doe een straatinterview van minimaal 2 minuten met een dame (en adt daarna een biertje).",
+      "Neem een video op waarin jullie allemaal tegelijk 1 boek aanbevelen.",
   },
-  rubys: {
-    id: "rubys",
-    name: "Ruby's Irish Pub",
+  petrus: {
+    id: "petrus",
+    name: "Petrus' Bandenkerk",
+    lat: 51.9544,
+    lng: 4.4370,
     isFinal: true,
   },
 };
 
 export const TEAM_ROUTES: Record<number, string[]> = {
-  1: ["kerk", "spoorzone", "poppodium013", "piushaven", "rubys"],
-  2: ["spoorzone", "poppodium013", "piushaven", "kerk", "rubys"],
-  3: ["poppodium013", "piushaven", "kerk", "spoorzone", "rubys"],
-  4: ["piushaven", "kerk", "spoorzone", "poppodium013", "rubys"],
+  1: ["berkebrom", "grotekerk", "museum", "halte", "petrus"],
+  2: ["grotekerk", "museum", "halte", "berkebrom", "petrus"],
+  3: ["museum", "halte", "berkebrom", "grotekerk", "petrus"],
+  4: ["halte", "berkebrom", "grotekerk", "museum", "petrus"],
 };
 
 export const TEAM_LABELS: Record<number, string> = {
