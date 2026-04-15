@@ -376,7 +376,7 @@ export default function HomePage() {
     );
   }
 
-  const mapsLink = getGoogleMapsLink(currentLocation.name, currentLocation.lat, currentLocation.lng);
+  const mapsLink = getGoogleMapsLink(currentLocation.name, currentLocation.lat, currentLocation.lng, currentLocation.mapsQuery );
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-zinc-100 via-white to-zinc-100 p-4 sm:p-6">

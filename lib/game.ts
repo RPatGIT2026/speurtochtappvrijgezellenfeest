@@ -1,6 +1,7 @@
 export type LocationItem = {
   id: string;
   name: string;
+  mapsQuery?: string;
   lat?: number;
   lng?: number;
   radiusMeters?: number;
@@ -9,55 +10,60 @@ export type LocationItem = {
 };
 
 export const LOCATIONS: Record<string, LocationItem> = {
-  berkebrom: {
-    id: "berkebrom",
-    name: "Eetcafé In den Berkebrom",
-    lat: 51.9516,
-    lng: 4.4337,
-    radiusMeters: 100,
-    challenge: "Maak hier een korte teamselfie-video van 10 seconden.",
-  },
-  grotekerk: {
-    id: "grotekerk",
-    name: "Grote Kerk Overschie",
-    lat: 51.9523,
-    lng: 4.4347,
-    radiusMeters: 100,
+  kerk: {
+    id: "kerk",
+    name: "Sint Dionysiuskerk",
+    mapsQuery: "Sint Dionysiuskerk Tilburg",
+    lat: 51.5553,
+    lng: 5.0914,
+    radiusMeters: 75,
     challenge:
-      "Laat 1 teamlid een speech van 15 seconden geven alsof hij burgemeester is.",
+      "Tegenover de kerk vind je het standbeeld van Willem 2. Wie kan hem het beste nadoen? Drink achteraf een biertje op Willem.",
   },
-  museum: {
-    id: "museum",
-    name: "Museum Overschie",
-    lat: 51.9530,
-    lng: 4.4355,
-    radiusMeters: 100,
+  spoorzone: {
+    id: "spoorzone",
+    name: "Spoorzone",
+    mapsQuery: "LocHal Tilburg",
+    lat: 51.5607,
+    lng: 5.0919,
+    radiusMeters: 75,
     challenge:
-      "Maak een video waarin jullie doen alsof jullie een museumrondleiding geven.",
+      "Bierpong op straat. Speel een potje met 3 bekers (en 2 biertjes) per kant op een bankje of tafel in teams. Het verliezende team neemt een shotje.",
   },
-  halte: {
-    id: "halte",
-    name: "Bibliotheek Overschie / De Halte",
-    lat: 51.9537,
-    lng: 4.4361,
-    radiusMeters: 100,
+  poppodium013: {
+    id: "poppodium013",
+    name: "013 Poppodium",
+    mapsQuery: "013 Poppodium Tilburg",
+    lat: 51.5575,
+    lng: 5.0906,
+    radiusMeters: 75,
+    challenge: "Neem een shotje met 2 milfs.",
+  },
+  piushaven: {
+    id: "piushaven",
+    name: "Piushaven",
+    mapsQuery: "Piushaven Tilburg",
+    lat: 51.5533,
+    lng: 5.0867,
+    radiusMeters: 75,
     challenge:
-      "Neem een video op waarin jullie allemaal tegelijk 1 boek aanbevelen.",
+      "Doe een straatinterview van minimaal 2 minuten met een dame (en adt daarna een biertje).",
   },
-  petrus: {
-    id: "petrus",
-    name: "Petrus' Bandenkerk",
-    lat: 51.9544,
-    lng: 4.4370,
+  rubys: {
+    id: "rubys",
+    name: "Ruby's Irish Pub",
+    mapsQuery: "Ruby's Irish Pub Tilburg",
+    lat: 51.5572,
+    lng: 5.0917,
     isFinal: true,
   },
 };
 
 export const TEAM_ROUTES: Record<number, string[]> = {
-  1: ["berkebrom", "grotekerk", "museum", "halte", "petrus"],
-  2: ["grotekerk", "museum", "halte", "berkebrom", "petrus"],
-  3: ["museum", "halte", "berkebrom", "grotekerk", "petrus"],
-  4: ["halte", "berkebrom", "grotekerk", "museum", "petrus"],
+  1: ["kerk", "spoorzone", "poppodium013", "piushaven", "rubys"],
+  2: ["spoorzone", "poppodium013", "piushaven", "kerk", "rubys"],
+  3: ["poppodium013", "piushaven", "kerk", "spoorzone", "rubys"],
+  4: ["piushaven", "kerk", "spoorzone", "poppodium013", "rubys"],
 };
 
 export const TEAM_LABELS: Record<number, string> = {
@@ -111,10 +117,22 @@ export function getDistanceInMeters(
   return R * c;
 }
 
-export function getGoogleMapsLink(name: string, lat?: number, lng?: number) {
+export function getGoogleMapsLink(
+  name: string,
+  lat?: number,
+  lng?: number,
+  mapsQuery?: string
+) {
+  if (mapsQuery) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      mapsQuery
+    )}`;
+  }
+
   if (lat && lng) {
     return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
   }
+
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`;
 }
 

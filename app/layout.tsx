@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Test speurtocht Overschie",
-  description: "Testversie van de speurtocht",
+  title: "vrijgezellenfeest",
+  description: "vrijgezellenfeest"
 };
 
 export default function RootLayout({
